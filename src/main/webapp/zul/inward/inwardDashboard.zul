@@ -74,6 +74,7 @@
                 <div sclass="srch-field-grow">
                     <label value="SEARCH BATCH ID" sclass="srch-label"/>
                     <textbox id="txtBatchId"
+                    		value="e.g. BATCH001"
                              placeholder="e.g. BATCH001"
                              width="420%"/>
                 </div>
@@ -106,7 +107,7 @@
             <!-- ── Batch Table ── -->
             <listbox id="batchListbox"
                      mold="paging"
-                     pageSize="10"
+                     pageSize="6"
                      width="100%"
                      emptyMessage="No inward batches found for this date.">
 

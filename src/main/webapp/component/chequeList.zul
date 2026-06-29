@@ -107,17 +107,35 @@
         </listhead>
 
     </listbox>
-
+    
     <!--
-        Pagination Area
-        flex-shrink:0 in CSS keeps this always visible
-        at the bottom of the right panel
+        Custom Footer: "Showing X-Y of Z" on LEFT, "< X of Y >" on RIGHT
     -->
-    <div sclass="cheque-pagination-area">
-        <paging id="pgChequeList"
-                pageSize="8"
-                totalSize="0"
-                sclass="cheque-paging"/>
+    <div sclass="cheque-footer-area">
+
+        <!-- LEFT: record count -->
+        <div sclass="cheque-footer-left">
+            <label id="lblChequeCount"
+                   value="Showing 0 of 0"
+                   sclass="cheque-count-label"/>
+        </div>
+
+        <!-- RIGHT: pagination controls -->
+        <div sclass="cheque-footer-right">
+            <button id="btnPrevPage"
+                    label="&lt;"
+                    sclass="footer-btn-prev"/>
+            <label id="lblPageInfo"
+                   value="0 of 0"
+                   sclass="page-info-label"/>
+            <button id="btnNextPage"
+                    label="&gt;"
+                    sclass="footer-btn-next"/>
+        </div>
+
     </div>
+
+    <!-- Hidden Paging (for internal logic only) -->
+    <paging id="pgChequeList" pageSize="5" totalSize="0" visible="false"/>
 
 </div>
