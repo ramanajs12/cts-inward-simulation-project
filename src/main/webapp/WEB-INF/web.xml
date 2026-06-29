@@ -126,7 +126,7 @@
     ================================================================= -->
 
     <welcome-file-list>
-        <welcome-file>zul/index.zul</welcome-file>
+        <welcome-file>zul/loginPage.zul</welcome-file>
     </welcome-file-list>
 
     <!-- =================================================================
