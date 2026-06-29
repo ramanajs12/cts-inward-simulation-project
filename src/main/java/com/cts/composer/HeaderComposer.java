@@ -304,7 +304,7 @@ public class HeaderComposer extends SelectorComposer<Component> {
     // IDLE AUTO-LOGOUT
     // ══════════════════════════════════════════════════════════════
 
-    private int idleSecondsLeft = 30;
+    private int idleSecondsLeft = 60;
 
     /** Helper — safely get the countdown label from inside the dialog. */
     private Label getIdleMsgLabel() {
@@ -315,7 +315,7 @@ public class HeaderComposer extends SelectorComposer<Component> {
 
     @Listen("onIdleWarn = #idleWarnDialog")
     public void onIdleWarn() {
-        idleSecondsLeft = 30;
+        idleSecondsLeft = 60;
         Label msg = getIdleMsgLabel();
         if (msg != null) {
             msg.setValue("You will be logged out in " + idleSecondsLeft + " seconds.");

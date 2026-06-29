@@ -91,7 +91,7 @@ public class InwardReportComposer extends SelectorComposer<Component> {
 
 	// ── Services / DAOs ───────────────────────────────────────────
 	private final ReportGenerationService reportService = new ReportGenerationServiceImpl();
-//	private final ReportChequeDetailDao chequeDao = new ReportChequeDetailDaoImpl();
+	//private final ReportChequeDetailDao chequeDao = new ReportChequeDetailDaoImpl();
 
 	// ── State ─────────────────────────────────────────────────────
 	private List<InwardBatchDTO> allBatches = new ArrayList<>();
@@ -665,7 +665,8 @@ public class InwardReportComposer extends SelectorComposer<Component> {
 			byte[] resPdf = hasRes ? reportService.generatePdfFromData(resData, "/reports/res_report.jrxml") : null;
 			byte[] rrfPdf = hasRrf ? reportService.generatePdfFromData(rrfData, "/reports/rrf_report.jrxml") : null;
 
-			String suffix = batchId;
+//			String suffix = batchId : sdfDisplay.format(new Date());
+			String suffix = batchId + "_" + sdfDisplay.format(new Date());
 
 			if (hasRes && hasRrf) {
 				Filedownload.save(resPdf, "application/pdf", "RES_" + suffix + ".pdf");
@@ -713,8 +714,12 @@ public class InwardReportComposer extends SelectorComposer<Component> {
 				return;
 			}
 
-			String suffix = batchIds.size() == 1 ? batchIds.get(0) : sdfDisplay.format(new Date());
+//			String suffix = batchIds.size() == 1 ? batchIds.get(0) : sdfDisplay.format(new Date());
 
+			String suffix = batchIds.size() == 1
+			        ? batchIds.get(0) + "_" + sdfDisplay.format(new Date())
+			        : sdfDisplay.format(new Date());
+			
 			if (hasRes && hasRrf) {
 				Filedownload.save(resPdf, "application/pdf", "RES_" + suffix + ".pdf");
 

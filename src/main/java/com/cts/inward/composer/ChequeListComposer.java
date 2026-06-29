@@ -12,6 +12,7 @@ import org.zkoss.zk.ui.event.EventQueues;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zul.Button;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
@@ -22,7 +23,6 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.event.PagingEvent;
 
 import com.cts.inward.entity.InwardCheque;
-import com.cts.inward.enums.ChequeStatus;
 import com.cts.inward.service.InwardChequeMICRService;
 import com.cts.inward.service.InwardChequeServiceMICRImpl;
 
@@ -40,12 +40,20 @@ public class ChequeListComposer extends SelectorComposer<Component> {
 	Paging pgChequeList;
 	@Wire
 	Datebox dpChequeDate;
+	
+	// ===== FOOTER COMPONENTS =====
+    @Wire Label lblChequeCount;
+    @Wire Label lblPageInfo;
+    @Wire Button btnPrevPage;
+    @Wire Button btnNextPage;
+
 
 	private Long currentBatchId = null;
 	private List<InwardCheque> allCheques = new ArrayList<>();
 	private List<InwardCheque> filteredCheques = new ArrayList<>();
 
-	private static final int PAGE_SIZE = 8;
+	private static final int PAGE_SIZE = 6;
+	private int currentPage = 0;
 	private String currentRole = "MAKER";
 
 	private static final DateTimeFormatter CHEQUE_DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -138,6 +146,8 @@ public class ChequeListComposer extends SelectorComposer<Component> {
 	 * effect is updated listbox UI for the given page index.
 	 */
 	private void renderPage(int pageIndex) {
+		currentPage = pageIndex;
+		
 		int fromIndex = pageIndex * PAGE_SIZE;
 		int toIndex = Math.min(fromIndex + PAGE_SIZE, filteredCheques.size());
 
@@ -150,6 +160,9 @@ public class ChequeListComposer extends SelectorComposer<Component> {
 
 			lbChequeList.appendChild(buildRow(cheque, rowNum++));
 		}
+		
+		// Update footer with new page info
+        updateFooter();
 	}
 
 	/**
@@ -214,6 +227,42 @@ public class ChequeListComposer extends SelectorComposer<Component> {
 	public void onFilterChange() {
 		applyFilter();
 	}
+	
+	
+	// ===================================================
+    // Update Footer Labels
+    // ===================================================
+    
+    private void updateFooter() {
+        if (lblChequeCount == null || lblPageInfo == null || 
+            btnPrevPage == null || btnNextPage == null) {
+            System.err.println("WARNING: Footer components not wired. Check ZUL file.");
+            return;
+        }
+        
+        int totalCheques = filteredCheques.size();
+        int totalPages = (totalCheques + PAGE_SIZE - 1) / PAGE_SIZE;
+        
+        // Calculate from and to indices
+        int fromIndex = currentPage * PAGE_SIZE + 1;
+        int toIndex = Math.min((currentPage + 1) * PAGE_SIZE, totalCheques);
+        
+        // Update "Showing X-Y of Z" label
+        if (totalCheques == 0) {
+            lblChequeCount.setValue("Showing 0 of 0");
+        } else {
+            lblChequeCount.setValue("Showing " + fromIndex + "-" + toIndex + " of " + totalCheques);
+        }
+        
+        // Update "X of Y" page info
+        int displayPage = Math.max(1, currentPage + 1);
+        int displayTotal = Math.max(1, totalPages);
+        lblPageInfo.setValue(displayPage + " of " + displayTotal);
+        
+        // Disable/Enable buttons
+        btnPrevPage.setDisabled(currentPage == 0 || totalCheques == 0);
+        btnNextPage.setDisabled(currentPage >= totalPages - 1 || totalCheques == 0);
+    }
 
 	/**
 	 * Combines keyword, status, and date filters against allCheques using stream
@@ -237,6 +286,8 @@ public class ChequeListComposer extends SelectorComposer<Component> {
 
 		pgChequeList.setTotalSize(filteredCheques.size());
 		pgChequeList.setActivePage(0);
+		
+		currentPage = 0;
 		renderPage(0);
 	}
 
@@ -293,6 +344,25 @@ public class ChequeListComposer extends SelectorComposer<Component> {
 			return false;
 		return status.equals(c.getChequeStatus().name());
 	}
+	
+	// ===================================================
+    // Pagination Button Listeners
+    // ===================================================
+    
+    @Listen("onClick = #btnPrevPage")
+    public void onPrevPage() {
+        if (currentPage > 0) {
+            renderPage(currentPage - 1);
+        }
+    }
+
+    @Listen("onClick = #btnNextPage")
+    public void onNextPage() {
+        int totalPages = (filteredCheques.size() + PAGE_SIZE - 1) / PAGE_SIZE;
+        if (currentPage < totalPages - 1) {
+            renderPage(currentPage + 1);
+        }
+    }
 
 	/**
 	 * Renders the page corresponding to the pagination event's active page index.

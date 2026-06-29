@@ -1,4 +1,4 @@
-	package com.cts.inward.composer;
+package com.cts.inward.composer;
 	
 	import java.text.SimpleDateFormat;
 	import java.time.format.DateTimeFormatter;
@@ -30,8 +30,7 @@
 	import com.cts.inward.service.InwardDashboardService;
 	import com.cts.inward.service.InwardDashboardServiceImpl;
 	
-	public class Maker_InwardDashboardComposer
-	        extends SelectorComposer<Component> {
+	public class Maker_InwardDashboardComposer extends SelectorComposer<Component> {
 	
 	    // ── Stat Labels ──────────────────────────────────────────
 	    @Wire private Label    lblTotalBatches;
@@ -50,9 +49,6 @@
 	    // ── Service ───────────────────────────────────────────────
 	    private final InwardDashboardService service =
 	            new InwardDashboardServiceImpl();
-	
-	//    private final SimpleDateFormat sdfDisplay =
-	//            new SimpleDateFormat("dd-MMM-yyyy HH:mm");
 	    
 	    private static final DateTimeFormatter sdfDisplay =
 	            DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm");
@@ -225,10 +221,13 @@
 	        String batchIdFilter = txtBatchId.getValue() == null
 	                ? "" : txtBatchId.getValue().trim().toLowerCase();
 	
+	        // cmbStatus.getValue() returns the SELECTED LABEL TEXT (ZK's plain
+	        // Combobox is textbox-backed — comboitem "value=" attributes are NOT
+	        // returned by getValue()). So we map the label to a BatchStatus enum
+	        // explicitly via statusFromLabel() instead of comparing raw strings.
 	        String rawStatus = cmbStatus.getValue() == null
 	                ? "" : cmbStatus.getValue().trim();
-	        String statusFilter = (rawStatus.isEmpty() || "ALL".equalsIgnoreCase(rawStatus))
-	                ? "" : rawStatus.toUpperCase();
+	        BatchStatus statusFilter = statusFromLabel(rawStatus);
 	
 	        List<InwardBatchDTO> filtered = new ArrayList<>();
 	
@@ -241,9 +240,8 @@
 	                }
 	            }
 	
-	            if (!statusFilter.isEmpty()) {
-	                if (b.getStatus() == null ||
-	                		!b.getStatus().name().equalsIgnoreCase(statusFilter)) {
+	            if (statusFilter != null) {
+	                if (statusFilter != b.getStatus()) {
 	                    continue;
 	                }
 	            }
@@ -256,7 +254,7 @@
 	
 	        System.out.println("SEARCH → date=[" + sdfMeta.format(selectedDate)
 	                + "] batchId=[" + batchIdFilter
-	                + "] status=[" + statusFilter
+	                + "] status=[" + (statusFilter != null ? statusFilter.name() : "ALL")
 	                + "] result=" + filtered.size() + "/" + currentDateBatches.size());
 	
 	        populateBatchTable(filtered);
@@ -365,6 +363,35 @@
 	    }
 	
 	
+	    // ── Status Combobox label → BatchStatus enum ─────────────
+	    // cmbStatus.getValue() returns the comboitem's LABEL text (ZK plain
+	    // Combobox is textbox-backed). "All"/blank → no filter (null).
+	    // Anything else maps to a single BatchStatus, used for an exact match.
+	    private BatchStatus statusFromLabel(String label) {
+
+	        if (label == null || label.isBlank()
+	                || "All".equalsIgnoreCase(label.trim())) {
+	            return null;
+	        }
+
+	        switch (label.trim().toUpperCase()) {
+	            case "DRAFT":
+	                return BatchStatus.Draft;
+	            case "PENDING":
+	                return BatchStatus.Pending;
+	            case "CLEARED":
+	                return BatchStatus.Cleared;
+	            case "PENDING AT CHECKER":
+	                return BatchStatus.PendingAtChecker;
+	            case "CLEARED AT CHECKER":
+	                return BatchStatus.ClearedAtChecker;
+	            default:
+	                // Unknown label — treat as no filter rather than throwing,
+	                // so a stray/legacy label never blanks out the whole list.
+	                return null;
+	        }
+	    }
+
 	    // ── Badge Style by Status ─────────────────────────────────
 	    private String badgeStyle(String status) {
 	
@@ -377,11 +404,17 @@
 	                return "background:#198754;color:white;" +
 	                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";
 	            case "PENDING":
-	                return "background:#ffc107;color:#1a1a1a;" +
-	                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";
+	                return "background:#e5e7eb;color:#374151;" +
+		                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";
 	            case "RECEIVED":
 	                return "background:#f59e0b;color:#1a1a1a;" +
 	                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";
+	            case "PENDINGATCHECKER":
+	                return "background:#e5e7eb;color:#374151;" +
+		                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";
+	            case "CLEAREDATCHECKER":
+	                return "background:#e5e7eb;color:#374151;" +
+		                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";
 	            default:
 	                return "background:#e5e7eb;color:#374151;" +
 	                       "padding:3px 12px;border-radius:12px;font-size:11px;font-weight:700;";

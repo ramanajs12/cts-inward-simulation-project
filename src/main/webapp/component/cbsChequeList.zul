@@ -34,8 +34,6 @@
         <div sclass="cheque-list-title-area">
             <label value="CBS VALIDATION RESULTS"
                    sclass="cheque-list-title"/>
-            <label value="(cheques appear one by one as they are validated)"
-                   sclass="cheque-list-subtitle"/>
         </div>
 
         <div sclass="cheque-list-controls">
