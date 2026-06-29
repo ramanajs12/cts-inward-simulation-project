@@ -323,9 +323,9 @@ public class TV2_ReferredChequeListComposer extends SelectorComposer<Component> 
 	// ── Helpers ────────────────────────────────────────────────────────────
 
 	private void updateBadgeCount(int count) {
-		String label = count + " Cheque" + (count != 1 ? "s" : "") + " Referred";
-		if (countBadge != null)
-			countBadge.setValue(label);
+//		String label = count + " Cheque" + (count != 1 ? "s" : "") + " Referred";
+//		if (countBadge != null)
+//			countBadge.setValue(label);
 	}
 
 	/**

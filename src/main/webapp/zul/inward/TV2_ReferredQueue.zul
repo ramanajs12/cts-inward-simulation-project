@@ -38,7 +38,7 @@
                                value=""/>
                     </div>
                     <div sclass="page-sub">
-                        Cheques sent back to Maker for correction — tracking only, no action needed here
+                        Cheques sent to Verify 2 for High Value Verification
                     </div>
                 </div>
                 <button id="ref-btn-refresh"
