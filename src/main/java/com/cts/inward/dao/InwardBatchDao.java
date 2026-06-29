@@ -111,6 +111,9 @@ public interface InwardBatchDao {
 
 	void updateBatchStatusIfCompleted(Long batchId);
 	
+	//Delete the existing batch. If processing with 0 valid cheques.
+	void delete(InwardBatch batchToUpdate);
+	
 	
 	
 

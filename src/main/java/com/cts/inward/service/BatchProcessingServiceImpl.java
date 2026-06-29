@@ -183,23 +183,26 @@ public class BatchProcessingServiceImpl implements BatchProcessingService {
             }
 
          // STEP 6 : Update batch
-         // Fetch fresh from DB — existing session from STEP 4 is already closed.
-         // We fetch again to get a live managed object safe for update.
-         InwardBatch batchToUpdate = batchDao.findByBatchId(batchId);
-         if (batchToUpdate != null) {
+            InwardBatch batchToUpdate = batchDao.findByBatchId(batchId);
+            if (batchToUpdate != null) {
 
-             // Add current run's inserted count to whatever is already in DB.
-             int updatedSuccessCount = batchToUpdate.getSuccessCount() + inserted;
-             batchToUpdate.setSuccessCount(updatedSuccessCount);
-
-             // Total cheques always comes from XML — never changes across runs.
-             batchToUpdate.setTotalCheques(total);
-
-             // Update createdAt to current date and time of this run.
-             batchToUpdate.setCreatedAt(LocalDateTime.now());
-
-             batchDao.update(batchToUpdate);
-         }
+                // ── NEW : If zero cheques were inserted, this batch is empty.
+                //    Either all were duplicates or all failed.
+                //    An empty batch has no value in DB — delete it cleanly.
+                if (inserted == 0) {
+                    batchDao.delete(batchToUpdate);
+                    System.out.println("Empty Batch Deleted : " + batchId
+                            + " (inserted=0, skipped=" + skipped
+                            + ", failed=" + failed + ")");
+                } else {
+                    // Normal update — at least one cheque was inserted
+                    int updatedSuccessCount = batchToUpdate.getSuccessCount() + inserted;
+                    batchToUpdate.setSuccessCount(updatedSuccessCount);
+                    batchToUpdate.setTotalCheques(total);
+                    batchToUpdate.setCreatedAt(LocalDateTime.now());
+                    batchDao.update(batchToUpdate);
+                }
+            }
 
 
             return batchId + "|" + total + "|" + inserted + "|" + skipped + "|" + failed;

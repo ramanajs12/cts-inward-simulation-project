@@ -285,12 +285,22 @@ public class BatchComposer extends SelectorComposer<Component> {
                             + "Failed Cheques    :  " + failedCount;
                 }
 
-                Messagebox.show(
+             // Navigate only if at least one cheque was inserted successfully
+                if (insertedCount > 0) {
+                    Messagebox.show(
                         message,
                         title,
                         Messagebox.OK,
                         icon,
                         event -> navigateToMicrService(batchDbId));
+                } else {
+                    // Batch already present or all failed — just show message, no navigation
+                    Messagebox.show(
+                        message,
+                        title,
+                        Messagebox.OK,
+                        icon);
+                }
 
 	        }, null);
 	    });
