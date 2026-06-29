@@ -901,6 +901,36 @@ public class InwardBatchDaoImpl implements InwardBatchDao {
 			tx.commit();
 		}
 	}
+	
+	@Override
+	public void delete(InwardBatch batch) {
+
+	    // Open a new Hibernate session for this delete operation
+	    try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+
+	        // Start a database transaction
+	        Transaction tx = session.beginTransaction();
+
+	        // Fetch a fresh managed copy of the batch from DB using its primary key
+	        InwardBatch managed = session.get(InwardBatch.class, batch.getId());
+
+	        // Only delete if the batch actually exists in DB
+	        if (managed != null) {
+
+	            // Remove the batch record from the database
+	            session.remove(managed);
+
+	            System.out.println("Batch Deleted from DB : " + batch.getBatchId());
+	        }
+
+	        // Commit the transaction to apply the delete permanently
+	        tx.commit();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException("Failed to delete batch : " + e.getMessage(), e);
+	    }
+	}
 
 	// ── Helpers ───────────────────────────────────────────────────────────
 	private LocalDateTime startOfDay(Date date) {
