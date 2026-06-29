@@ -152,7 +152,8 @@ body, .z-window {
     flex-wrap: wrap;
 }
 .srch-field      { display: flex; flex-direction: column; gap: 5px; }
-.srch-field-grow { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 160px; }
+
+.srch-field-grow { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 190px; }
 
 .srch-label {
     font-size: 10.5px;
