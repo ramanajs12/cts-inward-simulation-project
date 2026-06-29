@@ -173,8 +173,8 @@
     align-items     : center;
     gap             : 12px;
     padding         : 14px 16px;
-    border-top      : 1px solid #dde6f5;
-    background      : #f8faff;
+    
+    background      : #ffff;
 }
 
 /* Return to RRF button — orange/warning tone */

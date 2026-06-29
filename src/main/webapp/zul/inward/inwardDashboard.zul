@@ -75,19 +75,21 @@
                     <label value="SEARCH BATCH ID" sclass="srch-label"/>
                     <textbox id="txtBatchId"
                              placeholder="e.g. BATCH001"
-                             width="100%"/>
+                             width="420%"/>
                 </div>
 
                 <div sclass="srch-field">
                     <label value="STATUS" sclass="srch-label"/>
                     <combobox id="cmbStatus"
                               readonly="true"
-                              width="140px"
+                              width="200px"
                               value="All">
                         <comboitem label="All"/>
                         <comboitem label="DRAFT"/>
                         <comboitem label="PENDING"/>
                         <comboitem label="CLEARED"/>
+                        <comboitem label="PENDING AT CHECKER"/>
+                        <comboitem label="CLEARED AT CHECKER"/>
                     </combobox>
                 </div>
 
@@ -97,7 +99,7 @@
                 </div>
 
                 <button id="btnSearch" sclass="btn-search-srch" label="🔍 Search"/>
-                <button id="btnClear"  sclass="btn-clear-srch"  label="✕ Clear"/>
+              
 
             </div>
 
