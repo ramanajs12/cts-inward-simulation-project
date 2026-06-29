@@ -28,10 +28,10 @@ public final class SecurityUtil {
 
     /** Public pages reachable without logging in. */
     private static final Set<String> PUBLIC_PAGES = Set.of(
-            "/", "/zul/index.zul");
+            "/", "/zul/loginPage.zul");
 
     /** The login page (where we send unauthenticated users). */
-    private static final String LOGIN_PAGE = "/zul/index.zul";
+    private static final String LOGIN_PAGE = "/zul/loginPage.zul";
 
     private SecurityUtil() {
     }

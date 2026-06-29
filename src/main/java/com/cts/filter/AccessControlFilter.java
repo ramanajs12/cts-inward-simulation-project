@@ -60,7 +60,7 @@ public class AccessControlFilter implements Filter {
 
         // Not allowed
         if (currentUser == null) {
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/zul/index.zul");
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/zul/loginPage.zul");
             return;
         }
 

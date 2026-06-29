@@ -388,6 +388,6 @@ public class HeaderComposer extends SelectorComposer<Component> {
 
     private void doLogout() {
         Sessions.getCurrent().invalidate();
-        Executions.sendRedirect("/zul/index.zul");
+        Executions.sendRedirect("/zul/loginPage.zul");
     }
 }
