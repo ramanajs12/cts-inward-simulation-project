@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?page title="Returned By Checker | CTS" contentType="text/html;charset=UTF-8"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+    xmlns:n="native"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+
+    <style src="/css/inward/Inwardmakerstyles.css"/>
+    <style src="/css/inward/checkerStyles.css"/>
+    <style src="/css/inward/cts-breadcrumb-filter-theme.css"/>
+
+    <div apply="com.cts.inward.composer.M_ReturnedByCheckerComposer"
+         sclass="rcb-page-wrap">
+
+        <!-- FIXED TOP — breadcrumb, header, banners, filters stay pinned -->
+        <div sclass="rcb-fixed-top">
+
+            <!-- Breadcrumb -->
+            <div sclass="cts-breadcrumb">
+                <n:span class="cts-breadcrumb-item">Home</n:span>
+                <n:span class="cts-breadcrumb-sep">›</n:span>
+                <n:span class="cts-breadcrumb-active">Returned By Checker</n:span>
+            </div>
+
+            <!-- Page header -->
+            <div sclass="page-hdr">
+                <div>
+                    <div sclass="page-title">
+                        <n:span class="rcb-title-dot">🔴</n:span>
+                        Returned By Checker
+                        <label id="rcb-count-badge"
+                               sclass="rcb-count-badge"
+                               value="—"/>
+                    </div>
+                    <div sclass="page-sub">
+                        Cheques rejected by Verifier / Branch Manager — correct and resubmit
+                    </div>
+                </div>
+                <button id="btn-refresh"
+                        sclass="rcb-btn-refresh"
+                        autodisable="false">
+                    ↺ Refresh
+                </button>
+            </div>
+
+            <!-- Success banner -->
+            <div id="rcb-success-banner" visible="false"
+                 sclass="rcb-success-banner">
+                <n:span class="rcb-success-icon">✅</n:span>
+                <n:div id="rcb-success-text"
+                       sclass="rcb-success-text"></n:div>
+                <button id="rcb-success-dismiss"
+                        sclass="rcb-success-dismiss"
+                        autodisable="false">✕</button>
+            </div>
+
+            <!-- Alert banner -->
+            <div id="rcb-alert-banner" sclass="rcb-alert-banner" visible="false">
+                <n:span class="rcb-alert-icon">⚠</n:span>
+                <n:span>
+                    <n:strong>Action Required</n:strong>
+                    — The following cheques were returned by Checkers.
+                    Click <n:strong>🔧 Re-correct</n:strong> to open the Repair Workspace.
+                </n:span>
+            </div>
+
+            <!-- Filter bar — Dashboard style -->
+            <div sclass="search-bar">
+
+                <div sclass="srch-field-grow">
+                    <label value="SEARCH CHEQUE / BATCH" sclass="srch-label"/>
+                    <textbox id="rcb-search"
+                             placeholder="Cheque no. or Batch ID..."
+                             width="100%"/>
+                </div>
+
+                <div sclass="srch-field">
+                    <label value="BATCH NUMBER" sclass="srch-label"/>
+                    <listbox id="rcb-batch-filter"
+                             mold="select"
+                             width="160px">
+                        <listitem label="All Batches" value="" selected="true"/>
+                    </listbox>
+                </div>
+
+                <button id="btn-search" sclass="btn-search-srch" label="🔍 Search" autodisable="false"/>
+                <button id="btn-clear-filter" sclass="btn-clear-srch" label="✕ Clear" autodisable="false"/>
+
+            </div>
+
+        </div>
+
+        <!-- SCROLL AREA — ONLY the table + paging scroll -->
+        <div sclass="rcb-scroll-area">
+
+            <div sclass="cts-table-wrap">
+                <grid id="rcb-grid" sclass="rcb-grid">
+                    <columns sizable="false" sclass="cts-grid-header-blue">
+                        <column label="#"                        width="45px"  align="center"/>
+                        <column label="Batch Number"             width="110px" align="center"/>
+                        <column label="Cheque Number"            width="120px" align="center"/>
+                        <column label="Amount (&#8377;)"         width="105px" align="center"/>
+                        <column label="Checker SendBack Reason"  width="380px" align="left"/>
+                        <column label="Action"                   width="110px" align="center"/>
+                    </columns>
+                    <rows id="rcb-rows">
+                        <row id="rcb-empty" visible="false">
+                            <cell colspan="6">
+                                <n:div class="rcb-empty-state">
+                                    <n:div class="rcb-empty-icon">✅</n:div>
+                                    <n:div class="rcb-empty-title">
+                                        No Returned Cheques
+                                    </n:div>
+                                    <n:div class="rcb-empty-desc">
+                                        All cheques are clear — no corrections pending from any Checker.
+                                    </n:div>
+                                </n:div>
+                            </cell>
+                        </row>
+                    </rows>
+                </grid>
+            </div>
+
+            <paging id="rcb-paging" pageSize="5" totalSize="0"
+                    sclass="rcb-paging"/>
+
+        </div>
+
+    </div>
+
+</zk>
