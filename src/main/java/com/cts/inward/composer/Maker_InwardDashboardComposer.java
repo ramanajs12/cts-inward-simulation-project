@@ -30,8 +30,7 @@ package com.cts.inward.composer;
 	import com.cts.inward.service.InwardDashboardService;
 	import com.cts.inward.service.InwardDashboardServiceImpl;
 	
-	public class Maker_InwardDashboardComposer
-	        extends SelectorComposer<Component> {
+	public class Maker_InwardDashboardComposer extends SelectorComposer<Component> {
 	
 	    // ── Stat Labels ──────────────────────────────────────────
 	    @Wire private Label    lblTotalBatches;
@@ -50,9 +49,6 @@ package com.cts.inward.composer;
 	    // ── Service ───────────────────────────────────────────────
 	    private final InwardDashboardService service =
 	            new InwardDashboardServiceImpl();
-	
-	//    private final SimpleDateFormat sdfDisplay =
-	//            new SimpleDateFormat("dd-MMM-yyyy HH:mm");
 	    
 	    private static final DateTimeFormatter sdfDisplay =
 	            DateTimeFormatter.ofPattern("dd-MMM-yyyy HH:mm");

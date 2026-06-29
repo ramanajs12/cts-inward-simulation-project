@@ -354,3 +354,88 @@ tr.cheque-list-head th.z-listheader .z-listheader-content {
     border-color : var(--primary-light);
     box-shadow   : 0 0 0 2px rgba(43, 91, 168, 0.1);
 }
+
+
+/* =============================================
+   Footer — 2-column layout
+   LEFT : "Showing X-Y of Z"
+   RIGHT: "< X of Y >"
+   ============================================= */
+
+.cheque-footer-area {
+    display      : flex;
+    align-items  : center;
+    justify-content: space-between;
+    padding      : 8px 14px;
+    border-top   : 1px solid var(--border);
+    flex-shrink  : 0;
+    background   : var(--surface);
+    min-height   : 46px;
+}
+
+/* LEFT: record count label */
+.cheque-footer-left {
+    display     : flex;
+    align-items : center;
+    flex        : 1;
+}
+
+/* RIGHT: pagination buttons + page info */
+.cheque-footer-right {
+    display         : flex;
+    align-items     : center;
+    justify-content : flex-end;
+    flex            : 1;
+    gap             : 8px;
+}
+
+/* "Showing X-Y of Z" label */
+.cheque-count-label {
+    font-size   : 12px;
+    color       : var(--text-muted);
+    font-weight : 500;
+    white-space : nowrap;
+}
+
+/* "1 of 4" page info label */
+.page-info-label {
+    font-size   : 12px;
+    font-weight : 600;
+    color       : var(--text-primary);
+    min-width   : 44px;
+    text-align  : center;
+    white-space : nowrap;
+}
+
+/* Prev / Next pagination buttons */
+.footer-btn-prev,
+.footer-btn-next {
+    display         : inline-flex;
+    align-items     : center;
+    justify-content : center;
+    width           : 28px;
+    height          : 28px;
+    padding         : 0;
+    border          : 1px solid var(--border);
+    border-radius   : var(--radius-sm);
+    background      : var(--surface);
+    color           : var(--primary);
+    font-size       : 13px;
+    font-weight     : 700;
+    cursor          : pointer;
+    transition      : background 0.15s, border-color 0.15s;
+    line-height     : 1;
+}
+
+.footer-btn-prev:hover:not([disabled]),
+.footer-btn-next:hover:not([disabled]) {
+    background   : var(--primary-light);
+    border-color : var(--primary);
+    color        : #ffffff;
+}
+
+.footer-btn-prev[disabled],
+.footer-btn-next[disabled] {
+    opacity : 0.35;
+    cursor  : not-allowed;
+}
