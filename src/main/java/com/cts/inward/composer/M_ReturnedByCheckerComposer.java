@@ -378,8 +378,8 @@ public class M_ReturnedByCheckerComposer extends SelectorComposer<Component> {
      * Updates the pending count badge shown on the page header and sidebar.
      */
     private void updateBadgeCount(int count) {
-        String label = count + " Cheque" + (count != 1 ? "s" : "") + " Waiting";
-        if (countBadge     != null) countBadge.setValue(label);
+//        String label = count + " Cheque" + (count != 1 ? "s" : "") + " Waiting";
+//        if (countBadge     != null) countBadge.setValue(label);
         if (statusBarCount != null) statusBarCount.setValue(String.valueOf(count));
         Executions.getCurrent().getSession().setAttribute("rcbPendingCount", count);
 

@@ -82,7 +82,7 @@ class MakerFieldValidatorTest {
         fieldTc.setValue("10");
         fieldAmount.setValue("5000");
         fieldDate.setValue(new java.util.Date()); // today
-        fieldAcc.setValue("123456789012");
+        fieldAcc.setValue("123456789012333");
         fieldPayee.setValue("Ramana");
     }
 
@@ -163,12 +163,14 @@ class MakerFieldValidatorTest {
     }
 
     @Test
-    @DisplayName("Account number with 19 digits -> invalid (max 18)")
+    @DisplayName("Account number longer than 15 digits -> invalid")
     void validateAll_accountNumberTooLong_returnsFalse() {
-        fieldAcc.setValue("1234567890123456789"); // 19 digits
+
+        fieldAcc.setValue("1234567890123456"); // 16 digits
 
         assertFalse(validator.validateAll());
-        assertEquals("Max 18 digits", errAcc.getValue());
+        assertTrue(errAcc.isVisible());
+        assertEquals("Must be exactly 15 digits", errAcc.getValue());
     }
 
     @Test

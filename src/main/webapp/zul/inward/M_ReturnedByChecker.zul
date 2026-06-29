@@ -22,15 +22,14 @@
                 <n:span class="cts-breadcrumb-active">Returned By Checker</n:span>
             </div>
 
-            <!-- Page header -->
+            <!-- Page header sclass="rcb-count-badge"-->
             <div sclass="page-hdr">
                 <div>
                     <div sclass="page-title">
                         <n:span class="rcb-title-dot">🔴</n:span>
                         Returned By Checker
                         <label id="rcb-count-badge"
-                               sclass="rcb-count-badge"
-                               value="—"/>
+                               value=""/>
                     </div>
                     <div sclass="page-sub">
                         Cheques rejected by Verifier / Branch Manager — correct and resubmit
