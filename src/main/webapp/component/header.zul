@@ -187,7 +187,7 @@
              At 0s       → fires 'onIdleLogout' to server (logout). -->
         <script defer="true"><![CDATA[
             (function () {
-                var IDLE_LIMIT   = 60;   // total seconds before logout (1 min)
+                var IDLE_LIMIT   = 300;   // total seconds before logout (5 min)
                 var WARN_AT      = 30;   // show warning when this many seconds left
                 var secondsIdle  = 0;
                 var warned       = false;
