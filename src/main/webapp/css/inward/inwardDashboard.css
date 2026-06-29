@@ -17,7 +17,6 @@ body, .z-window {
     box-shadow: none !important;
 }
 .z-window-content {
-    padding: 0 !important;
     margin: 0 !important;
 }
 .z-window-header,
