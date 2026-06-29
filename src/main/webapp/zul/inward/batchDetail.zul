@@ -27,7 +27,7 @@
 		</div>
 
         <div sclass="page-subtitle-bar">
-            <label id="lblPageSubtitle" sclass="page-subtitle-label"/>
+            <label id="lblPageSubtitle" value="Pawan" sclass="page-subtitle-label"/>
         </div>
 
         <div sclass="two-panel-layout">
