@@ -17,6 +17,8 @@
     CHANGE 2: Added CHEQUE DATE column to the results table.
               Column widths redistributed to fit 7 columns (must still sum to 100%).
     CHANGE 3: Added Cheque Date datebox filter before Search and Status filter.
+    CHANGE 4: Replaced ZK paging with custom footer (left count + right buttons)
+              matching chequeList.zul pattern exactly.
 -->
 
 <div apply="com.cts.inward.composer.CbsChequeListComposer"
@@ -25,7 +27,7 @@
     <!--
         Timer: fires every 100ms.
         Each tick = one cheque validated + one row added to the list.
-        running="false" → stopped at start; composer calls start() when batch arrives.
+        running="false" -> stopped at start; composer calls start() when batch arrives.
     -->
     <timer id="cbsProcessTimer" delay="100" repeats="true" running="false"/>
 
@@ -95,12 +97,32 @@
 
     </listbox>
 
-    <!-- Pagination -->
-    <div sclass="cheque-pagination-area">
-        <paging id="pgCbsChequeList"
-                pageSize="8"
-                totalSize="0"
-                sclass="cheque-paging"/>
+    <!-- Custom Footer: "Showing X-Y of Z" on LEFT, "< X of Y >" on RIGHT -->
+    <div sclass="cheque-footer-area">
+
+        <!-- LEFT: record count -->
+        <div sclass="cheque-footer-left">
+            <label id="lblCbsChequeCount"
+                   value="Showing 0 of 0"
+                   sclass="cheque-count-label"/>
+        </div>
+
+        <!-- RIGHT: pagination controls -->
+        <div sclass="cheque-footer-right">
+            <button id="btnCbsPrevPage"
+                    label="&lt;"
+                    sclass="footer-btn-prev"/>
+            <label id="lblCbsPageInfo"
+                   value="0 of 0"
+                   sclass="page-info-label"/>
+            <button id="btnCbsNextPage"
+                    label="&gt;"
+                    sclass="footer-btn-next"/>
+        </div>
+
     </div>
+
+    <!-- Hidden Paging (for internal logic only) -->
+    <paging id="pgCbsChequeList" pageSize="6" totalSize="0" visible="false"/>
 
 </div>
