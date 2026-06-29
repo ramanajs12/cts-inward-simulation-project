@@ -273,6 +273,7 @@ public class InwardChequeServiceMICRImpl implements InwardChequeMICRService {
         String v = value != null ? value.trim() : "";
         if (v.isEmpty())             return "Account Number is required.";
         if (!v.matches("\\d+"))      return "Account Number must contain digits only (no letters/symbols).";
+        if (v.length() != 15)        return "Account Number must be exactly 15 digits.";
         return null;
     }
 
@@ -511,18 +512,24 @@ public class InwardChequeServiceMICRImpl implements InwardChequeMICRService {
     // CHEQUE EDIT & MICR REPAIR — 
     // ============================================================
 
+    // ── UPDATED: added editedFields parameter ──────────────────────────────
+    // editedFields is a comma-separated list of field ids that the Maker
+    // changed — e.g. "tbChequeNo,tbAmount,tbCityCode"
+    // This is stored in the DB so the Checker can restore blue highlights
+    // when they open the same cheque popup from a different browser/machine.
+    // All other existing behaviour is unchanged.
     @Override
     public void saveChequeEdit(InwardCheque cheque, String chequeNo, String cityCode, String bankCode,
             String branchCode, String transactionCode, String accountNo, String chequeDateStr,
-            String amountStr, String amountInWords) {
+            String amountStr, String amountInWords, String editedFields) {
 
         if (cheque == null) {
             throw new IllegalArgumentException("Cheque cannot be null");
         }
 
-        String correctedMicr = buildMicrCode(cityCode, bankCode, branchCode);
-        String correctedChequeNo = chequeNo != null ? chequeNo.trim() : "";
-        String correctedBankCode = bankCode != null ? bankCode.trim() : "";
+        String correctedMicr       = buildMicrCode(cityCode, bankCode, branchCode);
+        String correctedChequeNo   = chequeNo   != null ? chequeNo.trim()   : "";
+        String correctedBankCode   = bankCode   != null ? bankCode.trim()   : "";
         String correctedBranchCode = branchCode != null ? branchCode.trim() : "";
 
         cheque.setChequeNo(correctedChequeNo);
@@ -541,9 +548,16 @@ public class InwardChequeServiceMICRImpl implements InwardChequeMICRService {
         cheque.setErrorReason(null);
         cheque.setIsEditedByMaker(true);
 
+        // ── NEW: persist which fields the Maker changed ────────────────────
+        // editedFields = "tbChequeNo,tbAmount,tbCityCode" (or null if nothing changed)
+        // Stored in the edited_fields TEXT column so the Checker can read it
+        // from the DB and restore blue highlights on their machine.
+        cheque.setEditedFields(editedFields);
+
         inwardChequeDao.update(cheque);
+
         if (cheque.getBatch() != null) {
-            Long batchId = cheque.getBatch().getId();
+            Long batchId      = cheque.getBatch().getId();
             BatchStatus currentStatus = getBatchStatus(batchId);
             if (BatchStatus.Draft.equals(currentStatus)) {
                 inwardBatchDao.updateBatchStatus(batchId, BatchStatus.Pending);

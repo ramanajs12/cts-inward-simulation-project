@@ -2,6 +2,7 @@ package com.cts.inward.composer;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -347,8 +348,10 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 		// Storing the initial values, which can be used further
 		captureOriginalValues();
 
-		// Used to highlight the maker edited field
-		restoreEditedHighlights(cheque.getId());
+		// ── UPDATED: restoreEditedHighlights now reads from DB (entity)
+		// instead of Desktop so Checker on a different machine also sees
+		// the blue highlights the Maker left behind.
+		restoreEditedHighlights(cheque);
 
 		// Only Maker edits live; TV1/TV2 are read-only reviewers, so wiring
 		// change listeners for them would be dead weight at best and could
@@ -454,10 +457,43 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 			return;
 		}
 		try {
+			// ── CHANGE 1: Build comma-separated list of changed fields ────────────
+			// Compare each field's current value to its original value captured
+			// when the popup opened. If different → Maker changed that field.
+			// This list is stored in the DB so Checker can restore blue highlights
+			// when they open the same cheque on a different machine/browser tab.
+			List<String> changedFields = new ArrayList<>();
+			if (!tbChequeNo.getValue().equals(originalValues.getOrDefault("tbChequeNo", "")))
+				changedFields.add("tbChequeNo");
+			if (!tbCityCode.getValue().equals(originalValues.getOrDefault("tbCityCode", "")))
+				changedFields.add("tbCityCode");
+			if (!tbBankCode.getValue().equals(originalValues.getOrDefault("tbBankCode", "")))
+				changedFields.add("tbBankCode");
+			if (!tbBranchCode.getValue().equals(originalValues.getOrDefault("tbBranchCode", "")))
+				changedFields.add("tbBranchCode");
+			if (!tbMicrNumber.getValue().equals(originalValues.getOrDefault("tbMicrNumber", "")))
+				changedFields.add("tbMicrNumber");
+			if (!tbTransactionCode.getValue().equals(originalValues.getOrDefault("tbTransactionCode", "")))
+				changedFields.add("tbTransactionCode");
+			if (!tbAccountNo.getValue().equals(originalValues.getOrDefault("tbAccountNo", "")))
+				changedFields.add("tbAccountNo");
+			if (!tbClearingDate.getValue().equals(originalValues.getOrDefault("tbClearingDate", "")))
+				changedFields.add("tbClearingDate");
+			if (!tbAmount.getValue().equals(originalValues.getOrDefault("tbAmount", "")))
+				changedFields.add("tbAmount");
+			if (!tbAmountInWords.getValue().equals(originalValues.getOrDefault("tbAmountInWords", "")))
+				changedFields.add("tbAmountInWords");
+			if (!tbPayeeName.getValue().equals(originalValues.getOrDefault("tbPayeeName", "")))
+				changedFields.add("tbPayeeName");
+
+			// Join as comma-separated string: e.g. "tbChequeNo,tbAmount,tbCityCode"
+			String editedFieldsCsv = String.join(",", changedFields);
+
+			// ── CHANGE 2: Pass editedFieldsCsv as new last argument ───────────────
 			chequeService.saveChequeEdit(selectedCheque, tbChequeNo.getValue().trim(), tbCityCode.getValue().trim(),
 					tbBankCode.getValue().trim(), tbBranchCode.getValue().trim(), tbTransactionCode.getValue().trim(),
 					tbAccountNo.getValue().trim(), tbClearingDate.getValue().trim(), tbAmount.getValue().trim(),
-					tbAmountInWords.getValue().trim());
+					tbAmountInWords.getValue().trim(), editedFieldsCsv);
 
 			/*
 			 * saveChequeEdit() sets ChequeStatus.Normal internally but does not touch
@@ -466,7 +502,6 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 			 */
 			chequeService.updateMICR(selectedCheque, DecisionStatus.PENDING, ChequeStatus.Normal, SendTo.MAKER);
 
-			persistHighlightsToDesktop(selectedCheque.getId());
 			resetErrorStyles();
 
 			Object batchPayload = selectedCheque.getBatch() != null ? selectedCheque.getBatch().getId() : null;
@@ -834,34 +869,12 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 			btnSaveChnages.setVisible(false);
 			btnRefer.setVisible(false); // TV2 never refers
 
-			// TWO scenarios where a cheque reaches TV2 with decision=REFERRED:
-			//
-			// Scenario A — TV2 returnToMaker():
-			// TV2 reviewed a high-value cheque and sent it back to Maker.
-			// Reason stored in checker_sendback_reason (getSendbackReason()).
-			// Cheque comes back after Maker fixes it → TV2 Resubmitted queue.
-			//
-			// Scenario B — TV1 Refer (ChequeEditPopupComposer.onConfirmRefer()):
-			// TV1 referred a low-value cheque up to TV2 for sign-off.
-			// Reason stored in checker_refer_reason (getReferReason()).
-			// Cheque lands directly in TV2 Referred Cheques tracking list.
-			//
-			// ORIGINAL BUG: only checked getSendbackReason(), so Scenario B
-			// cheques (TV1-referred) always had hasReferReason=false → tv2CanAct=false
-			// → Approve/Reject buttons hidden on the Referred Cheques popup.
 			boolean hasReferReason = (selectedCheque.getSendbackReason() != null
 					&& !selectedCheque.getSendbackReason().trim().isEmpty())
 					|| (selectedCheque.getReferReason() != null && !selectedCheque.getReferReason().trim().isEmpty());
 
-			// Is this popup opened from the TV2 Referred Cheques tab?
 			boolean fromReferredTab = "REFERRED_TAB".equals(popupSource);
-
-			// Normal rule: TV2 acts on cheques routed to TV_2.
 			boolean routedToTv2 = SendTo.TV_2.equals(selectedCheque.getSendTo());
-
-			// From the Referred tab, the cheque is currently sent to MAKER
-			// (referred for correction) but TV2 is allowed to act on it here
-			// — approve, reject, or send back — so we also accept that case.
 			boolean referredToMaker = fromReferredTab && SendTo.MAKER.equals(selectedCheque.getSendTo())
 					&& DecisionStatus.REFERRED.equals(selectedCheque.getDecision());
 
@@ -870,24 +883,9 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 							|| ChequeStatus.Repair.equals(selectedCheque.getChequeStatus()))
 					&& (DecisionStatus.PENDING.equals(selectedCheque.getDecision())
 							|| (DecisionStatus.REFERRED.equals(selectedCheque.getDecision()) && hasReferReason));
-			
-//			System.out.println("=== TV2 BUTTON DEBUG ===");
-//            System.out.println("popupSource   = [" + popupSource + "]");
-//            System.out.println("currentRole   = [" + currentRole + "]");
-//            System.out.println("sendTo        = [" + selectedCheque.getSendTo() + "]");
-//            System.out.println("decision      = [" + selectedCheque.getDecision() + "]");
-//            System.out.println("chequeStatus  = [" + selectedCheque.getChequeStatus() + "]");
-//            System.out.println("referReason   = [" + selectedCheque.getReferReason() + "]");
-//            System.out.println("sendbackReason= [" + selectedCheque.getSendbackReason() + "]");
-//            System.out.println("hasReferReason= " + hasReferReason);
-//            System.out.println("tv2CanAct     = " + tv2CanAct);
-//            System.out.println("========================");
 
 			btnApprove.setVisible(tv2CanAct);
 			btnReject.setVisible(tv2CanAct);
-			// SendBack is visible whenever TV2 can act — including from the
-			// Referred Cheques tab. TV2 may want to send the cheque back to
-			// Maker again after reviewing it here.
 			btnSendBack.setVisible(tv2CanAct);
 
 			if (tv2CanAct) {
@@ -917,16 +915,6 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 	// =============================================
 	// Maker edit validation — delegated to chequeService
 	// =============================================
-	// Every format/business rule below comes from InwardChequeServiceMICRImpl
-	// (validateChequeNumber, validateCodePart, validateTransactionCode,
-	// validateAccountNumber, validateAmountValue, isMicrMatch,
-	// buildMicrMismatchMessage, getChequeIdentityBlockingMessage,
-	// getChequeDetailsBlockingMessage, generateAmountInWordsDisplay) so the
-	// rules live in exactly one place and match the teammate's original
-	// Maker-only composer. These checks only run for MAKER, and only ever
-	// gate the Save Changes path. TV1/TV2 fields are locked read-only by
-	// updateButtonState(), so none of this can interfere with their
-	// Approve/Reject/Refer/Send Back actions.
 
 	private void runInitialFieldValidation() {
 		checkFieldFormat(tbChequeNo, "tbChequeNo");
@@ -939,11 +927,6 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 		validateMicrRealTime();
 	}
 
-	/**
-	 * Validates one field's value via chequeService.validateField(fieldId, value)
-	 * and applies/clears the red error highlight accordingly. Returns true if the
-	 * field is valid.
-	 */
 	private boolean checkFieldFormat(Textbox tb, String fieldId) {
 		String value = tb.getValue() != null ? tb.getValue().trim() : "";
 		String error = chequeService.validateField(fieldId, value);
@@ -1025,19 +1008,11 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 		}
 	}
 
-	/**
-	 * Regenerates the Amount-in-Words field from the current Amount value via
-	 * chequeService.generateAmountInWordsDisplay(). Amount's own
-	 * format/negative/number checks are handled by checkFieldFormat(tbAmount,
-	 * "tbAmount") — called by the listener right before this method — so this
-	 * method only needs to worry about producing (or clearing) the words text.
-	 */
 	private void autoGenerateAmountInWords() {
 		String raw = tbAmount.getValue().trim();
 		String generated = chequeService.generateAmountInWordsDisplay(raw);
 		tbAmountInWords.setValue(generated);
 		if (!generated.isEmpty()) {
-
 			updateHighlight(tbAmountInWords, "tbAmountInWords");
 		}
 	}
@@ -1183,13 +1158,6 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 		return v != null ? v : "";
 	}
 
-	private static final String DESKTOP_ATTR_PREFIX = "editedFields_";
-
-	private String[] allFieldIds() {
-		return new String[] { "tbChequeNo", "tbCityCode", "tbBankCode", "tbBranchCode", "tbMicrNumber",
-				"tbTransactionCode", "tbAccountNo", "tbChequeDate", "tbAmount", "tbAmountInWords" };
-	}
-
 	private Textbox tbById(String id) {
 		switch (id) {
 		case "tbChequeNo":
@@ -1207,56 +1175,45 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 		case "tbAccountNo":
 			return tbAccountNo;
 		case "tbChequeDate":
+		case "tbClearingDate":
 			return tbClearingDate;
 		case "tbAmount":
 			return tbAmount;
 		case "tbAmountInWords":
 			return tbAmountInWords;
+		case "tbPayeeName":
+			return tbPayeeName;
 		default:
 			return null;
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private void restoreEditedHighlights(Long chequeId) {
-		if (chequeId == null)
+	// ── CHANGE 3: restoreEditedHighlights now reads from the DB via the
+	// InwardCheque entity instead of the Desktop session bag.
+	// The Maker's edited fields are stored in the edited_fields TEXT column
+	// by saveChequeEdit(). When the Checker opens the same cheque popup
+	// from a different browser tab or machine, their Desktop is fresh and
+	// empty — but the entity already has the field list from the DB, so
+	// the blue highlights restore correctly on any machine.
+	private void restoreEditedHighlights(InwardCheque cheque) {
+		if (cheque == null)
 			return;
-		Desktop dt = chequeEditPopupWindow.getDesktop();
-		Object stored = dt.getAttribute(DESKTOP_ATTR_PREFIX + chequeId);
-		if (!(stored instanceof Map))
+
+		// Read the comma-separated field id list stored by the Maker's save
+		// e.g. "tbChequeNo,tbAmount,tbCityCode"
+		String editedFieldsCsv = cheque.getEditedFields();
+
+		if (editedFieldsCsv == null || editedFieldsCsv.trim().isEmpty())
 			return;
-		Map<String, Boolean> editedMap = (Map<String, Boolean>) stored;
-		for (String id : allFieldIds()) {
-			if (Boolean.TRUE.equals(editedMap.get(id))) {
-				Textbox tb = tbById(id);
-				if (tb != null)
-					applyEditedStyle(tb);
+
+		// Split and apply blue highlight to each field the Maker changed
+		String[] fieldIds = editedFieldsCsv.split(",");
+		for (String fieldId : fieldIds) {
+			Textbox tb = tbById(fieldId.trim());
+			if (tb != null) {
+				applyEditedStyle(tb);
 			}
 		}
-	}
-
-	private void persistHighlightsToDesktop(Long chequeId) {
-		if (chequeId == null)
-			return;
-		Desktop dt = chequeEditPopupWindow.getDesktop();
-		String key = DESKTOP_ATTR_PREFIX + chequeId;
-
-		@SuppressWarnings("unchecked")
-		Map<String, Boolean> editedMap = (Map<String, Boolean>) dt.getAttribute(key);
-		if (editedMap == null)
-			editedMap = new HashMap<>();
-
-		for (String id : allFieldIds()) {
-			Textbox tb = tbById(id);
-			if (tb == null)
-				continue;
-			if (!tb.getValue().equals(originalValues.getOrDefault(id, ""))) {
-				editedMap.put(id, Boolean.TRUE);
-			} else {
-				editedMap.remove(id);
-			}
-		}
-		dt.setAttribute(key, editedMap);
 	}
 
 }

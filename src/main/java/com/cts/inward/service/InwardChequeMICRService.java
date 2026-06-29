@@ -167,7 +167,7 @@ public interface InwardChequeMICRService {
             String accountNo,
             String chequeDateStr,
             String amountStr,
-            String amountInWords);
+            String amountInWords, String editedFields);
 
         public boolean isMakerEditedAndPendingReview(InwardCheque cheque);
 
