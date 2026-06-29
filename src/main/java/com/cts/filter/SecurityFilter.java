@@ -34,9 +34,9 @@ public class SecurityFilter implements Filter {
     private static final long RECHECK_INTERVAL_MS = 30_000L;
 
     private static final Set<String> PUBLIC_PAGES = Set.of(
-            "/", "/zul/index.zul");
+            "/", "/zul/loginPage.zul");
 
-    private static final Set<String> LOGIN_PAGES = Set.of("/zul/index.zul");
+    private static final Set<String> LOGIN_PAGES = Set.of("/zul/loginPage.zul");
 
     private final UserService userService = new UserServiceImpl();
 
@@ -76,7 +76,7 @@ public class SecurityFilter implements Filter {
                 session.invalidate();
                 LOG.info("SecurityFilter: invalidated session for '{}' (status={})",
                         currentUser.getUsername(), currentUser.getStatus());
-                response.sendRedirect(contextPath + "/zul/index.zul");
+                response.sendRedirect(contextPath + "/zul/loginPage.zul");
                 return;
             }
         }
@@ -92,7 +92,7 @@ public class SecurityFilter implements Filter {
         // Not logged in + non-public page → login
         if (!loggedIn && !PUBLIC_PAGES.contains(path)) {
             LOG.debug("Unauthenticated request for {} → redirect to login", path);
-            response.sendRedirect(contextPath + "/zul/index.zul");
+            response.sendRedirect(contextPath + "/zul/loginPage.zul");
             return;
         }
 
@@ -116,7 +116,7 @@ public class SecurityFilter implements Filter {
         if (fresh.isEmpty() || !fresh.get().isActive() || fresh.get().isLocked()) {
             session.invalidate();
             LOG.info("SecurityFilter: DB re-check failed for '{}'", user.getUsername());
-            response.sendRedirect(contextPath + "/zul/index.zul");
+            response.sendRedirect(contextPath + "/zul/loginPage.zul");
             return null;
         }
 
