@@ -819,7 +819,9 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 			// FIX: isLocked check now lives here — inside the MAKER
 			// case only. TV1/TV2 cases are completely unaffected.
 			boolean locked = selectedCheque.getBatch() != null
-					&& BatchStatus.PendingAtChecker.equals(selectedCheque.getBatch().getBatchStatus());
+					&& (BatchStatus.PendingAtChecker.equals(selectedCheque.getBatch().getBatchStatus())
+							||
+							BatchStatus.ClearedAtChecker.equals(selectedCheque.getBatch().getBatchStatus()));
 
 			setFieldsEditable(!locked);
 
@@ -828,7 +830,7 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 			btnRefer.setVisible(false);
 			btnSendBack.setVisible(false);
 
-			btnSaveChnages.setVisible(true);
+			btnSaveChnages.setVisible(!locked);
 			btnSaveChnages.setDisabled(locked);
 
 			// Attach listeners and run validation only when MAKER
@@ -883,6 +885,10 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 							|| ChequeStatus.Repair.equals(selectedCheque.getChequeStatus()))
 					&& (DecisionStatus.PENDING.equals(selectedCheque.getDecision())
 							|| (DecisionStatus.REFERRED.equals(selectedCheque.getDecision()) && hasReferReason));
+<<<<<<< Updated upstream
+=======
+			
+>>>>>>> Stashed changes
 
 			btnApprove.setVisible(tv2CanAct);
 			btnReject.setVisible(tv2CanAct);
