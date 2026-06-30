@@ -885,6 +885,10 @@ public class ChequeEditPopupComposer extends SelectorComposer<Component> {
 							|| ChequeStatus.Repair.equals(selectedCheque.getChequeStatus()))
 					&& (DecisionStatus.PENDING.equals(selectedCheque.getDecision())
 							|| (DecisionStatus.REFERRED.equals(selectedCheque.getDecision()) && hasReferReason));
+<<<<<<< Updated upstream
+=======
+			
+>>>>>>> Stashed changes
 
 			btnApprove.setVisible(tv2CanAct);
 			btnReject.setVisible(tv2CanAct);
